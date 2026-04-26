@@ -1,0 +1,110 @@
+table td, table p, table a {
+    text-align: center;
+}
+table td {
+    border: 2px solid;
+}
+table td:hover {
+    animation-name: animation;
+    animation-duration: 1s;
+}
+
+section .content-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 65vh;
+    border-width: 0 0 0 1rem;
+    border-style: solid;
+    margin-left: 2vw;
+    cursor: default;
+    white-space: nowrap;
+}
+
+section h1 {
+    font-family: var(--font-primary);
+    font-weight: normal;
+    font-size: calc(8rem + 4vw);
+    padding-left: 2rem;
+}
+
+section .content-gap {
+    height: calc(35vh - 14rem);
+    margin-left: 2vw;
+    padding-bottom: 4rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    border-width: 0 0 2px;
+    border-style: solid;
+}
+
+.direction-sign{
+    margin: 5px;
+    font-size: 0.8rem;
+    cursor: default;
+}
+
+.arrow-down {
+    border: solid;
+    border-width: 0 2px 2px 0;
+    padding: 5px;
+    transform: rotate(45deg);
+}
+
+section .content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 3rem -5rem 0;
+    border-width: 2px 0;
+    border-style: solid;
+    height: 76vh;
+    padding-left: calc(2vw + 2rem);
+}
+
+section .content .youtube{
+    cursor: pointer;
+}
+section .content .youtube:hover{
+    opacity: 0.9;
+}
+
+section .content img, section .content iframe {
+    height: 550px;
+    width: 550px;
+    border: 2px solid var(--bg-secondary);
+}
+
+section .content #logo-graphic {
+    border-radius: 20rem;
+}
+
+@media only screen and (max-width: 699px) {
+    section .content-header {
+        height: 61vh;
+    }
+
+    section .content {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        align-items: center;
+        margin: 0;
+        padding-left: 0;
+        border: 0;
+    }
+
+    section .content img, section .content iframe {
+        height: 75vw;
+        width: 75vw;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    section .content-header {
+        border-width: 0;
+        margin-left: 0;
+    }
+}

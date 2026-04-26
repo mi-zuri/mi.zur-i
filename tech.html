@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>tech — mi.zur-i</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="tech portfolio — projects, fetched live from github"
+    />
+    <meta name="author" content="Michał Żurawski" />
+    <link rel="stylesheet" href="https://use.typekit.net/lgc5ifx.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat&family=Lobster&family=Monoton&family=Orbitron:wght@700&family=Permanent+Marker&family=Playfair+Display:ital@1&family=Press+Start+2P&family=Rubik+Mono+One&display=swap"
+      rel="stylesheet"
+    />
+    <link href="assets/fontawesome/css/fontawesome.css" rel="stylesheet" />
+    <link href="assets/fontawesome/css/solid.css" rel="stylesheet" />
+    <link href="assets/fontawesome/css/regular.css" rel="stylesheet" />
+    <link href="assets/fontawesome/css/brands.css" rel="stylesheet" />
+    <style>
+      /* ── TOKENS (mirrors index.html) ─────────────────────── */
+      :root {
+        font-size: 17px;
+        font-family: monospace;
+        --font-primary: "birch-std", monospace;
+        --text-primary: #722a1f;
+        --text-secondary: #0d9898;
+        --bg-primary: #c7c7c7;
+        --bg-secondary: #732a1f;
+        --bg-dark: #1c1c1c;
+        --bg-light: #c7c7c7;
+        --menu-side-space: calc(1rem + 1vw);
+        --nav-width: 4rem;
+        --nav-right: calc(1rem + var(--menu-side-space) + 1vw - 2rem);
+        --content-mr: calc(var(--nav-right) + var(--nav-width) + 3rem);
+        --content-ml: calc(var(--menu-side-space) + 2vw + 1rem);
+        --header-h: 8rem;
+      }
+
+      * {
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background-color: var(--text-primary);
+      }
+
+      body {
+        color: var(--text-primary);
+        background-color: var(--bg-primary);
+        padding: 1rem 1rem 0;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        visibility: hidden;
+        position: relative;
+        min-height: 100vh;
+      }
+      body.fonts-loaded {
+        visibility: visible;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar {
+        display: none;
+      }
+      a {
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      /* ── HEADER ───────────────────────────────────────────── */
+      header {
+        height: var(--header-h);
+        padding-left: var(--menu-side-space);
+        padding-right: var(--menu-side-space);
+        display: flex;
+        align-items: center;
+        --logo-font-size: calc(4rem + 1vw);
+      }
+      header .logo p {
+        font-family: var(--font-primary);
+        font-weight: normal;
+        font-size: var(--logo-font-size);
+        text-align: center;
+      }
+      header .left {
+        flex: 10;
+        margin-right: calc(var(--logo-font-size) / 5);
+      }
+      header .logo {
+        flex: 1;
+      }
+      header .right {
+        flex: 2;
+        margin-left: calc(var(--logo-font-size) / 5);
+        margin-right: 1vw;
+      }
+
+      .horizontal-line {
+        border-bottom: 3px solid;
+        display: block;
+      }
+      .vertical-line {
+        border-left: 3px solid;
+        display: block;
+      }
+
+      /* ── CONNECTOR ───────────────────────────────────────── */
+      .menu-connector {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        margin-top: 5rem;
+        margin-bottom: 2.5rem;
+        margin-right: calc(1rem + var(--menu-side-space) + 1vw);
+        z-index: 9998;
+      }
+
+      /* ── NAVBAR ──────────────────────────────────────────── */
+      .navbar {
+        position: fixed;
+        right: 0;
+        top: 0;
+        margin-top: var(--header-h);
+        margin-right: calc(var(--nav-right));
+        background-color: var(--bg-primary);
+        border: 2px solid;
+        z-index: 9999;
+        width: var(--nav-width);
+        overflow: hidden;
+        transition: width 0.18s ease;
+      }
+      .navbar:hover {
+        width: 12rem;
+      }
+      .navbar:hover .link-text {
+        display: block;
+      }
+
+      .navbar-nav {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100%;
+      }
+      .nav-item {
+        width: 100%;
+      }
+      .nav-item:last-child {
+        margin-top: auto;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        height: 4rem;
+        font-size: 2rem;
+        cursor: pointer;
+        user-select: none;
+        white-space: nowrap;
+      }
+      .nav-link:hover {
+        color: var(--text-secondary);
+      }
+      .nav-link i.fa {
+        width: 4rem;
+        text-align: center;
+        flex-shrink: 0;
+        position: relative;
+      }
+      .link-text {
+        font-size: 1.2rem;
+        display: none;
+        margin-left: 0;
+      }
+
+      /* ── MAIN ────────────────────────────────────────────── */
+      main {
+        margin: 0 var(--content-mr) 0 var(--content-ml);
+        padding: 0;
+        padding-bottom: 6rem;
+      }
+
+      /* ── PAGE INTRO ──────────────────────────────────────── */
+      .page-intro {
+        padding-top: 1rem;
+        padding-bottom: 2rem;
+      }
+      .page-eyebrow {
+        font-size: 0.85rem;
+        letter-spacing: 0.3em;
+        text-transform: lowercase;
+        opacity: 0.65;
+        margin-bottom: 0.6rem;
+      }
+      .page-title {
+        font-family: var(--font-primary);
+        font-weight: normal;
+        font-size: clamp(4rem, 11vw, 9rem);
+        line-height: 0.9;
+        letter-spacing: -0.02em;
+      }
+      .page-subtitle {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-top: 1rem;
+        max-width: 36rem;
+        opacity: 0.85;
+      }
+      .page-soft {
+        display: block;
+        opacity: 0.55;
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
+      }
+
+      /* ── FILTER BAR ──────────────────────────────────────── */
+      .filter-bar {
+        margin: 2rem 0 2.5rem;
+        padding: 1.2rem 0;
+        border-top: 2px solid;
+        border-bottom: 2px solid;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      .filter-label {
+        font-size: 0.75rem;
+        letter-spacing: 0.25em;
+        text-transform: lowercase;
+        opacity: 0.65;
+        margin-right: 0.5rem;
+      }
+      .filter-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .filter-tag {
+        border: 2px solid;
+        background: transparent;
+        color: inherit;
+        padding: 0.25rem 0.8rem;
+        font-size: 0.8rem;
+        font-family: monospace;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition:
+          background 0.18s ease,
+          color 0.18s ease,
+          opacity 0.18s ease;
+      }
+      .filter-tag:hover {
+        opacity: 0.7;
+      }
+      .filter-tag.active {
+        background: var(--text-primary);
+        color: var(--bg-primary);
+      }
+
+      /* ── PROJECTS LIST ───────────────────────────────────── */
+      .projects-status {
+        padding: 2rem 0;
+        font-size: 0.9rem;
+        opacity: 0.7;
+      }
+      .projects-status .small {
+        font-size: 0.75rem;
+        opacity: 0.7;
+        margin-top: 0.4rem;
+      }
+
+      .projects-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .project-card {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: clamp(1.5rem, 4vw, 3rem);
+        padding: 2.2rem 0;
+        border-bottom: 2px solid;
+        align-items: center;
+      }
+      .project-card:first-child {
+        border-top: 2px solid;
+      }
+
+      .project-card.hidden {
+        display: none;
+      }
+
+      .project-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+        min-width: 0;
+      }
+
+      .project-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .project-tag {
+        border: 2px solid;
+        padding: 0.18rem 0.65rem;
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: lowercase;
+      }
+      .project-updated {
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+        text-transform: lowercase;
+        opacity: 0.6;
+      }
+
+      .project-name {
+        font-family: var(--font-primary);
+        font-weight: normal;
+        font-size: clamp(2rem, 4.5vw, 3.4rem);
+        line-height: 0.95;
+        letter-spacing: -0.02em;
+        word-break: break-word;
+      }
+
+      .project-description {
+        font-size: 0.95rem;
+        line-height: 1.55;
+        max-width: 36rem;
+        opacity: 0.9;
+      }
+      .project-description.muted {
+        opacity: 0.55;
+        font-style: italic;
+      }
+
+      .project-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.2rem 1.6rem;
+        margin-top: 0.4rem;
+      }
+      .project-link {
+        font-size: 0.85rem;
+        letter-spacing: 0.1em;
+        text-transform: lowercase;
+        border-bottom: 2px solid;
+        padding-bottom: 0.1rem;
+        transition: opacity 0.18s ease;
+      }
+      .project-link:hover {
+        opacity: 0.65;
+      }
+      .project-link i.fa {
+        margin-right: 0.4rem;
+        font-size: 0.95em;
+      }
+
+      .project-image-wrap {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        border: 2px solid;
+        background: rgba(114, 42, 31, 0.06);
+      }
+      .project-image-wrap.empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        letter-spacing: 0.25em;
+        text-transform: lowercase;
+        opacity: 0.45;
+      }
+      .project-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* ── RESPONSIVE ──────────────────────────────────────── */
+      @media (max-width: 699px) {
+        header .right {
+          margin-right: 0;
+        }
+        .menu-connector {
+          display: none;
+        }
+
+        .navbar {
+          bottom: 0;
+          top: auto;
+          width: 100vw !important;
+          height: 4rem;
+          margin: 0;
+          border-width: 2px 0 0;
+          border-color: var(--bg-secondary);
+        }
+        .navbar-nav {
+          flex-direction: row;
+          height: 4rem;
+        }
+        .nav-item:last-child {
+          display: none;
+        }
+        .nav-link {
+          justify-content: center;
+        }
+        .link-text {
+          display: none !important;
+        }
+
+        main {
+          margin-left: 0;
+          margin-right: 0;
+          padding-bottom: 6rem;
+        }
+        .page-title {
+          font-size: clamp(3rem, 14vw, 5rem);
+        }
+
+        .project-card {
+          grid-template-columns: 1fr;
+          gap: 1.4rem;
+        }
+        .project-image-wrap {
+          order: -1;
+          aspect-ratio: 16 / 9;
+        }
+      }
+
+      @media only screen and (min-width: 700px) {
+        .navbar {
+          top: 0;
+          width: 4rem;
+          height: calc(100vh - var(--header-h) - 5rem);
+        }
+        .navbar:hover {
+          width: 12rem;
+        }
+        .navbar:hover .link-text {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header id="top">
+      <span class="horizontal-line left"></span>
+      <div class="logo">
+        <p><a href="index.html">mi.zur&#8209;i</a></p>
+      </div>
+      <span class="horizontal-line right"></span>
+    </header>
+
+    <!-- CONNECTOR -->
+    <div class="vertical-line menu-connector"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a href="index.html" class="nav-link">
+            <i class="fa fa-solid fa-arrow-left"></i>
+            <span class="link-text">home</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="toggleStyle()">
+            <i class="fa fa-solid fa-yin-yang"></i>
+            <span class="link-text" id="dark-mode-label">night-mode</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <main>
+      <section class="page-intro">
+        <p class="page-eyebrow">portfolio</p>
+        <h1 class="page-title">tech</h1>
+        <p class="page-subtitle">
+          projects, research &amp; side-quests
+          <span class="page-soft"
+            >fetched live from github · sorted by recent updates</span
+          >
+        </p>
+      </section>
+
+      <section class="filter-bar" aria-label="filter projects by tag">
+        <span class="filter-label">filter:</span>
+        <div class="filter-tags" id="filter-tags">
+          <button class="filter-tag active" data-tag="__all__">all</button>
+        </div>
+      </section>
+
+      <div class="projects-status" id="projects-status">
+        loading projects from github...
+      </div>
+
+      <section
+        class="projects-list"
+        id="projects-list"
+        aria-live="polite"
+      ></section>
+    </main>
+
+    <script>
+      document.fonts.ready.then(() =>
+        document.body.classList.add("fonts-loaded"),
+      );
+
+      /* ── DARK MODE (same logic as index.html) ─────────────── */
+      (function () {
+        if (localStorage.getItem("dark-mode") === "1") darkModeOn(true);
+      })();
+
+      function toggleStyle() {
+        if (localStorage.getItem("dark-mode") === "1") darkModeOff();
+        else darkModeOn(false);
+      }
+
+      function darkModeOn(silent) {
+        document.documentElement.style.setProperty("--bg-primary", "#1c1c1c");
+        document.getElementById("dark-mode-label").textContent = "light-mode";
+        document.getElementById("navbar").style.backgroundColor = "#1c1c1c";
+        localStorage.setItem("dark-mode", "1");
+      }
+
+      function darkModeOff() {
+        document.documentElement.style.setProperty("--bg-primary", "#c7c7c7");
+        document.getElementById("dark-mode-label").textContent = "night-mode";
+        document.getElementById("navbar").style.backgroundColor = "#c7c7c7";
+        localStorage.setItem("dark-mode", "0");
+      }
+
+      /* ── GITHUB PROJECTS ──────────────────────────────────── */
+      const GH_USER = "mi-zuri";
+
+      // Common badge hosts to skip when picking the "first README image"
+      // (otherwise the hero is usually a green "build passing" badge).
+      const BADGE_HOST_PATTERNS = [
+        /(^|\.)shields\.io$/i,
+        /(^|\.)badge\.fury\.io$/i,
+        /(^|\.)travis-ci\.(org|com)$/i,
+        /(^|\.)circleci\.com$/i,
+        /(^|\.)codecov\.io$/i,
+        /(^|\.)coveralls\.io$/i,
+        /(^|\.)appveyor\.com$/i,
+        /(^|\.)snyk\.io$/i,
+        /(^|\.)gitter\.im$/i,
+        /(^|\.)badgen\.net$/i,
+      ];
+
+      function isBadgeUrl(url) {
+        try {
+          const u = new URL(url);
+          if (BADGE_HOST_PATTERNS.some((re) => re.test(u.hostname)))
+            return true;
+          // GitHub-hosted badge endpoints
+          if (/\/badge(s)?\b/i.test(u.pathname)) return true;
+          if (/\/workflows\/.+\/badge\.svg/i.test(u.pathname)) return true;
+          return false;
+        } catch {
+          return false;
+        }
+      }
+
+      // Resolve a markdown image src against the repo's raw URL when relative.
+      function resolveImageUrl(src, owner, repo, branch) {
+        if (!src) return null;
+        if (/^https?:\/\//i.test(src)) return src;
+        if (src.startsWith("data:")) return null;
+        const cleaned = src.replace(/^\.?\//, "");
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${cleaned}`;
+      }
+
+      // Walk through every image in README order; return the first non-badge one.
+      function pickFirstImage(md, owner, repo, branch) {
+        const images = [];
+        const mdRe = /!\[[^\]]*\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
+        const htmlRe = /<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/gi;
+        let m;
+        while ((m = mdRe.exec(md))) images.push({ src: m[1], at: m.index });
+        while ((m = htmlRe.exec(md))) images.push({ src: m[1], at: m.index });
+        images.sort((a, b) => a.at - b.at);
+
+        for (const { src } of images) {
+          const resolved = resolveImageUrl(src, owner, repo, branch);
+          if (!resolved) continue;
+          if (isBadgeUrl(resolved)) continue;
+          return resolved;
+        }
+        return null;
+      }
+
+      async function fetchReadmeImage(repo) {
+        try {
+          const res = await fetch(
+            `https://api.github.com/repos/${repo.owner.login}/${repo.name}/readme`,
+          );
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (!data.download_url) return null;
+          const md = await fetch(data.download_url).then((r) =>
+            r.ok ? r.text() : null,
+          );
+          if (!md) return null;
+          return pickFirstImage(
+            md,
+            repo.owner.login,
+            repo.name,
+            repo.default_branch,
+          );
+        } catch {
+          return null;
+        }
+      }
+
+      function timeAgo(iso) {
+        const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+        if (sec < 60) return "just now";
+        const min = Math.floor(sec / 60);
+        if (min < 60) return `${min}m ago`;
+        const hr = Math.floor(min / 60);
+        if (hr < 24) return `${hr}h ago`;
+        const d = Math.floor(hr / 24);
+        if (d < 30) return `${d}d ago`;
+        const mo = Math.floor(d / 30);
+        if (mo < 12) return `${mo}mo ago`;
+        const y = Math.floor(d / 365);
+        return `${y}y ago`;
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? "").replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+
+      function renderCard(repo, image) {
+        const tag = repo.language || "other";
+        const homepage =
+          repo.homepage && /^https?:\/\//i.test(repo.homepage)
+            ? repo.homepage
+            : null;
+
+        const imageBlock = image
+          ? `<div class="project-image-wrap">
+               <img class="project-image" src="${escapeHtml(image)}"
+                    alt="${escapeHtml(repo.name)} preview"
+                    loading="lazy"
+                    onerror="this.parentElement.classList.add('empty');this.parentElement.textContent='no preview';"/>
+             </div>`
+          : `<div class="project-image-wrap empty">no preview</div>`;
+
+        const description = repo.description
+          ? `<p class="project-description">${escapeHtml(repo.description)}</p>`
+          : `<p class="project-description muted">no description</p>`;
+
+        const demoLink = homepage
+          ? `<a class="project-link" href="${escapeHtml(homepage)}" target="_blank" rel="noopener">
+               <i class="fa fa-solid fa-arrow-up-right-from-square"></i>demo
+             </a>`
+          : "";
+
+        return `
+          <article class="project-card" data-tag="${escapeHtml(tag)}">
+            <div class="project-text">
+              <div class="project-meta">
+                <span class="project-tag">${escapeHtml(tag)}</span>
+                <span class="project-updated">updated ${escapeHtml(timeAgo(repo.updated_at))}</span>
+              </div>
+              <h2 class="project-name">${escapeHtml(repo.name)}</h2>
+              ${description}
+              <div class="project-links">
+                <a class="project-link" href="${escapeHtml(repo.html_url)}" target="_blank" rel="noopener">
+                  <i class="fa fa-brands fa-github"></i>github
+                </a>
+                ${demoLink}
+              </div>
+            </div>
+            ${imageBlock}
+          </article>
+        `;
+      }
+
+      function renderFilterTags(tags) {
+        const container = document.getElementById("filter-tags");
+        const sorted = [...tags].sort((a, b) => a.localeCompare(b));
+        const allBtn = `<button class="filter-tag active" data-tag="__all__">all</button>`;
+        const tagBtns = sorted
+          .map(
+            (t) =>
+              `<button class="filter-tag" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>`,
+          )
+          .join("");
+        container.innerHTML = allBtn + tagBtns;
+        container.querySelectorAll(".filter-tag").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            container
+              .querySelectorAll(".filter-tag")
+              .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            applyFilter(btn.dataset.tag);
+          });
+        });
+      }
+
+      function applyFilter(tag) {
+        document.querySelectorAll(".project-card").forEach((card) => {
+          const cardTag = card.dataset.tag;
+          card.classList.toggle("hidden", tag !== "__all__" && cardTag !== tag);
+        });
+      }
+
+      async function loadProjects() {
+        const status = document.getElementById("projects-status");
+        const list = document.getElementById("projects-list");
+
+        let repos;
+        try {
+          const res = await fetch(
+            `https://api.github.com/users/${GH_USER}/repos?sort=updated&per_page=100`,
+          );
+          if (!res.ok) {
+            throw new Error(
+              res.status === 403
+                ? "github rate limit hit — try again in a bit"
+                : `github responded with ${res.status}`,
+            );
+          }
+          repos = await res.json();
+        } catch (err) {
+          status.innerHTML = `couldn't load projects.<div class="small">${escapeHtml(err.message)}</div>`;
+          return;
+        }
+
+        // Drop forks; keep archived (it's still our work). Already sorted by updated_at desc.
+        repos = repos.filter((r) => !r.fork);
+
+        if (repos.length === 0) {
+          status.textContent = "no projects yet ^.^";
+          return;
+        }
+
+        // Kick off README image fetches in parallel; render placeholders immediately
+        // so users see content even if some READMEs hang or fail.
+        status.remove();
+
+        const tags = new Set();
+        repos.forEach((r) => tags.add(r.language || "other"));
+        renderFilterTags(tags);
+
+        // Render skeleton cards (no image yet)
+        list.innerHTML = repos.map((r) => renderCard(r, null)).join("");
+
+        // Now resolve images and patch them in
+        const results = await Promise.allSettled(repos.map(fetchReadmeImage));
+        results.forEach((res, i) => {
+          if (res.status !== "fulfilled" || !res.value) return;
+          const card = list.children[i];
+          if (!card) return;
+          const wrap = card.querySelector(".project-image-wrap");
+          if (!wrap) return;
+          wrap.classList.remove("empty");
+          wrap.innerHTML = `<img class="project-image" src="${escapeHtml(res.value)}"
+              alt="${escapeHtml(repos[i].name)} preview" loading="lazy"
+              onerror="this.parentElement.classList.add('empty');this.parentElement.textContent='no preview';"/>`;
+        });
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>

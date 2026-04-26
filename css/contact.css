@@ -1,0 +1,25 @@
+section .content form {
+    width: 40%;
+}
+
+input[type=text], input[type=email], select, textarea, input[type=submit] {
+    width: 100%;
+    padding: 12px;
+    background-color: white;
+    box-sizing: border-box;
+    border: 1px solid var(--bg-secondary);
+}
+
+textarea {
+    height: 100px;
+    resize: none;
+}
+
+input[type=submit] {
+    color: var(--bg-primary);
+    background-color: var(--bg-secondary);
+    cursor: pointer;
+}
+input[type=submit]:hover {
+    background-color: var(--text-secondary);
+}

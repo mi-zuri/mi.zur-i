@@ -1,0 +1,130 @@
+:root {
+    font-size: 17px;
+    font-family: monospace;
+    --font-primary: "birch-std", monospace;
+    --text-primary:#722a1f;
+    --text-secondary:#0d9898;
+    --bg-primary:#c7c7c7;
+    --bg-secondary:#732A1F;
+
+    --menu-side-space: calc(1rem + 1vw);
+}
+
+* {
+    margin: 0;
+}
+
+@keyframes animation {
+    0%   {background-color:red;}
+    25%  {background-color:yellow;}
+    50%  {background-color:blue;}
+    75%  {background-color:green;}
+    100% {background-color:red;}
+}
+
+body {
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+
+    padding: 1rem 1rem 0;
+
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    visibility: hidden;
+}
+body.fonts-loaded {
+    visibility: visible;
+}
+body::-webkit-scrollbar {
+    display: none;
+}
+
+a {
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+header {
+    height: 8rem;
+    padding-left: var(--menu-side-space);
+    padding-right: var(--menu-side-space);
+    display: flex;
+    align-items: center;
+
+    --logo-font-size: calc(4rem + 1vw);
+}
+
+header .logo p {
+    font-family: var(--font-primary);
+    font-weight: normal;
+    font-size: var(--logo-font-size);
+    text-align: center;
+}
+
+header .left {
+    flex: 10;
+    margin-right: calc(var(--logo-font-size)/5);
+}
+header .logo {
+    flex: 1;
+}
+header .right {
+    flex: 2;
+    margin-left: calc(var(--logo-font-size)/5);
+    margin-right: 1vw;
+}
+
+.horizontal-line {
+    border-bottom: 3px solid;
+    display: block;
+}
+.vertical-line {
+    border-left: 3px solid;
+    display: block;
+}
+
+main {
+    height: calc(175vh - 5rem);
+    padding: 1rem;
+    margin-top: 2rem;
+    margin-left: calc(var(--menu-side-space) + 1vw + 2rem + 4px + 4rem);
+    margin-right: calc(var(--menu-side-space) + 1vw + 2rem + 4px + 10rem);
+}
+
+footer {
+    height: 3rem;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    margin-left: -2rem;
+}
+
+footer .fa {
+    font-size: 1.5rem;
+    opacity: 0.9;
+}
+
+footer .copyright-info {
+    padding-left: 1rem;
+    opacity: 0.9;
+}
+
+@media only screen and (max-width: 699px) {
+    header .right {
+        margin-right: 0;
+    }
+
+    main {
+        height: calc(175vh - 4rem);
+        margin: 0;
+    }
+
+    footer {
+        display: none;
+    }
+}

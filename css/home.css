@@ -1,0 +1,303 @@
+/* Home page additions.
+   Reuses base.css layout (header bar, main margins, footer).
+   Body / main / nav styling is unchanged from the original. */
+
+html {
+    scroll-behavior: smooth;
+}
+
+main.home-main {
+    height: auto;
+}
+
+/* Big visual section titles use the brand serif. Everything else is monospace
+   (already the document default via :root font-family). */
+.home-section-heading {
+    font-family: var(--font-primary);
+    font-weight: normal;
+    font-size: calc(6rem + 3vw);
+    text-align: center;
+    margin: 4rem 0 2rem;
+    padding-left: 0;
+    line-height: 1;
+}
+
+/* === Section: Pillars === */
+
+.pillars {
+    display: flex;
+    flex-direction: row;
+    min-height: 80vh;
+    margin-top: 2rem;
+    border: 2px solid var(--bg-secondary);
+    border-style: solid none;
+}
+
+.pillar {
+    flex: 1;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    text-decoration: none;
+    transition: filter 0.3s ease;
+}
+
+.pillar:hover {
+    animation-name: animation;
+    animation-duration: 1.5s;
+}
+
+/* Locked palette — does not respond to dark-mode toggle.
+   Music = light card, Tech = dark card. */
+.pillar-music {
+    background: #c7c7c7;
+    color: #722a1f;
+    border-right: 2px solid #722a1f;
+}
+.pillar-tech {
+    background: #722a1f;
+    color: #c7c7c7;
+}
+
+.pillar-title {
+    font-family: var(--font-primary);
+    font-weight: normal;
+    font-size: calc(5rem + 4vw);
+    line-height: 1;
+    margin-bottom: 1.2rem;
+}
+
+.pillar-tagline {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+}
+
+.pillar-cta {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pillar:hover .pillar-cta {
+    opacity: 1;
+    transform: translateX(4px);
+}
+
+/* === Generic home section spacing === */
+
+.home-section {
+    margin-top: 4rem;
+}
+
+/* === Section: Timeline === */
+
+.timeline-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.timeline-empty {
+    text-align: center;
+    opacity: 0.6;
+    font-style: italic;
+}
+
+.timeline-row {
+    display: grid;
+    grid-template-columns: 7rem 6rem 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    text-decoration: none;
+    border: 2px solid;
+}
+.timeline-row:hover {
+    animation-name: animation;
+    animation-duration: 1.5s;
+}
+
+/* Locked palette per category */
+.timeline-music {
+    background: #c7c7c7;
+    color: #722a1f;
+    border-color: #722a1f;
+}
+.timeline-tech {
+    background: #722a1f;
+    color: #c7c7c7;
+    border-color: #c7c7c7;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+}
+
+.timeline-badge {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid currentColor;
+    text-align: center;
+}
+
+.timeline-title {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.timeline-desc {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    grid-column: 3 / 4;
+    grid-row: 2;
+}
+
+/* === Section: About === */
+
+.about-body {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    grid-template-areas:
+        "portrait text"
+        "facts    facts";
+    gap: 2rem;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.about-portrait {
+    grid-area: portrait;
+    width: 12rem;
+    height: 12rem;
+    border-radius: 50%;
+    border: 2px solid var(--bg-secondary);
+    object-fit: cover;
+}
+
+.about-text {
+    grid-area: text;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    line-height: 1.6;
+}
+
+.about-facts {
+    grid-area: facts;
+    list-style: none;
+    padding: 1.5rem 0 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+    border-top: 2px solid var(--bg-secondary);
+}
+
+.about-facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* === Section: Contact === */
+
+.contact-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-top: 2px solid var(--bg-secondary);
+    padding-bottom: 4rem;
+}
+
+.contact-email {
+    font-size: calc(1.4rem + 1vw);
+    margin-bottom: 2rem;
+    word-break: break-all;
+    text-align: center;
+}
+.contact-email:hover {
+    color: var(--text-secondary);
+}
+
+.contact-socials {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 2rem;
+}
+.contact-socials a {
+    font-size: 1.8rem;
+}
+.contact-socials a:hover {
+    color: var(--text-secondary);
+}
+
+/* === Active nav state for scrollspy (hearts go solid when section active) === */
+
+.nav-link.is-active {
+    color: var(--text-secondary);
+}
+
+/* === Mobile === */
+
+@media only screen and (max-width: 699px) {
+    .pillars {
+        flex-direction: column;
+    }
+    .pillar {
+        min-height: 50vh;
+    }
+    .pillar-music {
+        border-right: none;
+        border-bottom: 2px solid #722a1f;
+    }
+    .pillar-title {
+        font-size: calc(3rem + 4vw);
+    }
+
+    .home-section-heading {
+        font-size: calc(4rem + 3vw);
+    }
+
+    .timeline-row {
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+            "title  badge"
+            "desc   desc"
+            "date   date";
+        padding: 0.75rem 1rem;
+    }
+    .timeline-title { grid-area: title; }
+    .timeline-badge { grid-area: badge; }
+    .timeline-desc  { grid-area: desc; grid-column: auto; grid-row: auto; }
+    .timeline-date  { grid-area: date; }
+
+    .about-body {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "portrait"
+            "text"
+            "facts";
+        text-align: center;
+    }
+    .about-portrait {
+        width: 8rem;
+        height: 8rem;
+        margin: 0 auto;
+    }
+}
