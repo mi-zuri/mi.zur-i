@@ -83,6 +83,28 @@
       body.fonts-loaded {
         visibility: visible;
       }
+      /* Navbar halo — separate fixed element so it can sit at a z-index BELOW
+         the header (60) and connector (9998), but still ABOVE page sections.
+         Result: full 4-direction halo around the navbar, but header content
+         and the connector strips above/below the navbar render on top of it. */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        right: 0;
+        margin-top: calc(var(--header-h) - 0.2rem);
+        margin-right: calc(var(--nav-right) - 0.2rem);
+        width: calc(var(--nav-width) + 0.4rem);
+        height: calc(100vh - var(--header-h) - 5rem + 0.4rem);
+        background-color: var(--bg-primary);
+        z-index: 50;
+        pointer-events: none;
+        transition: width 0.18s ease;
+      }
+      /* Expands in lockstep with the navbar's own width transition on hover. */
+      body:has(.navbar:hover)::before {
+        width: calc(12rem + 0.4rem);
+      }
       html::-webkit-scrollbar,
       body::-webkit-scrollbar {
         display: none;
@@ -100,6 +122,10 @@
         display: flex;
         align-items: center;
         --logo-font-size: calc(4rem + 1vw);
+        /* Lifted above the navbar halo (z-index: 50) so the halo's upward
+           extension can't paint over header content. Still below the navbar (9999). */
+        position: relative;
+        z-index: 60;
       }
       header .logo p {
         font-family: var(--font-primary);
@@ -138,7 +164,9 @@
         right: 0;
         margin-top: 5rem;
         margin-bottom: 2.5rem;
-        margin-right: calc(1rem + var(--menu-side-space) + 1vw);
+        /* -1.5px: the line is rendered as `border-left`, so its visual center
+           sits half the border width to the left of the box's right edge. */
+        margin-right: calc(1rem + var(--menu-side-space) + 1vw - 1.5px);
         z-index: 9998;
       }
 
@@ -202,7 +230,9 @@
       }
 
       .nav-link i.fa {
-        width: 4rem;
+        /* Match navbar's content area (--nav-width minus 2x 2px border) so the
+           glyph centers on the navbar's geometric axis instead of 2px right of it. */
+        width: calc(var(--nav-width) - 4px);
         text-align: center;
         flex-shrink: 0;
         position: relative;
@@ -254,10 +284,12 @@
         cursor: pointer;
         transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
-        color: var(--text-primary);
+        --portal-text: var(--text-primary);
+        color: var(--portal-text);
       }
       .portal:hover {
-        flex: 1.25;
+        flex: 1.1;
+        --portal-text: var(--text-secondary);
       }
 
       .portal::before {
@@ -266,7 +298,7 @@
         left: 1.5vw;
         top: 5%;
         height: 80%;
-        border-left: 1rem solid var(--text-primary);
+        border-left: 1rem solid var(--portal-text);
         z-index: 1;
       }
 
@@ -299,14 +331,14 @@
       .portal-items {
         list-style: none;
         padding: 0;
-        border-top: 2px solid var(--text-primary);
+        border-top: 2px solid var(--portal-text);
         padding-top: 0.8rem;
         margin-top: 0.5rem;
       }
       .portal-items li {
         font-size: 0.9rem;
         padding: 0.25rem 0;
-        border-bottom: 1px solid;
+        border-bottom: 1px solid var(--portal-text);
         opacity: 0.85;
       }
 
@@ -627,6 +659,12 @@
       @media (max-width: 699px) {
         html {
           scroll-snap-type: none;
+        }
+        /* Halo's geometry is tied to the desktop navbar (right side, tall);
+           mobile navbar is bottom-anchored and full-width, so the halo isn't
+           meaningful there. */
+        body::before {
+          display: none;
         }
         header .right {
           margin-right: 0;
