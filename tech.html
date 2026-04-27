@@ -648,8 +648,18 @@
         );
       }
 
+      function repoTags(repo) {
+        if (Array.isArray(repo.languages) && repo.languages.length > 0) {
+          return repo.languages;
+        }
+        return [repo.language || "other"];
+      }
+
       function renderCard(repo, image) {
-        const tag = repo.language || "other";
+        const tags = repoTags(repo);
+        const tagBadges = tags
+          .map((t) => `<span class="project-tag">${escapeHtml(t)}</span>`)
+          .join("");
         const homepage =
           repo.homepage && /^https?:\/\//i.test(repo.homepage)
             ? repo.homepage
@@ -680,10 +690,10 @@
           : "";
 
         return `
-          <article class="project-card" data-tag="${escapeHtml(tag)}">
+          <article class="project-card" data-tags="${escapeHtml(JSON.stringify(tags))}">
             <div class="project-text">
               <div class="project-meta">
-                <span class="project-tag">${escapeHtml(tag)}</span>
+                ${tagBadges}
                 <span class="project-updated">updated ${escapeHtml(timeAgo(repo.updated_at))}</span>
               </div>
               <h2 class="project-name">${escapeHtml(repo.name)}</h2>
@@ -700,9 +710,25 @@
         `;
       }
 
+      // Groups of languages that share a single filter button. The key is the
+       // label shown on the button; the value is the set of languages that
+       // satisfy it. Members are matched against the underlying per-card tags.
+      const FILTER_GROUPS = {
+        "C/C++": ["C", "C++"],
+        "JavaScript/TypeScript": ["JavaScript", "TypeScript"],
+      };
+
+      function groupForLanguage(lang) {
+        for (const [label, members] of Object.entries(FILTER_GROUPS)) {
+          if (members.includes(lang)) return label;
+        }
+        return lang;
+      }
+
       function renderFilterTags(tags) {
         const container = document.getElementById("filter-tags");
-        const sorted = [...tags].sort((a, b) => a.localeCompare(b));
+        const grouped = new Set([...tags].map(groupForLanguage));
+        const sorted = [...grouped].sort((a, b) => a.localeCompare(b));
         const allBtn = `<button class="filter-tag active" data-tag="__all__">all</button>`;
         const tagBtns = sorted
           .map(
@@ -723,16 +749,21 @@
       }
 
       function applyFilter(tag) {
+        const members = FILTER_GROUPS[tag] || [tag];
         document.querySelectorAll(".project-card").forEach((card) => {
-          const cardTag = card.dataset.tag;
-          card.classList.toggle("hidden", tag !== "__all__" && cardTag !== tag);
+          let cardTags = [];
+          try {
+            cardTags = JSON.parse(card.dataset.tags || "[]");
+          } catch {}
+          const matches = cardTags.some((t) => members.includes(t));
+          card.classList.toggle("hidden", tag !== "__all__" && !matches);
         });
       }
 
       function renderProjects(repos, images) {
         const list = document.getElementById("projects-list");
         const tags = new Set();
-        repos.forEach((r) => tags.add(r.language || "other"));
+        repos.forEach((r) => repoTags(r).forEach((t) => tags.add(t)));
         renderFilterTags(tags);
         list.innerHTML = repos
           .map((r, i) => renderCard(r, images[i] || null))

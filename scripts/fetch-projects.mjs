@@ -73,6 +73,22 @@ function pickFirstImage(md, owner, repo, branch) {
   return null;
 }
 
+async function fetchLanguages(repo) {
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/${repo.owner.login}/${repo.name}/languages`,
+      { headers },
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Object.entries(data)
+      .sort((a, b) => b[1] - a[1])
+      .map(([lang]) => lang);
+  } catch {
+    return [];
+  }
+}
+
 async function fetchReadmeImage(repo) {
   try {
     const res = await fetch(
@@ -107,11 +123,12 @@ async function mapWithLimit(items, limit, fn) {
   return out;
 }
 
-function slimRepo(r) {
+function slimRepo(r, languages) {
   return {
     name: r.name,
     description: r.description,
     language: r.language,
+    languages: languages || [],
     homepage: r.homepage,
     html_url: r.html_url,
     updated_at: r.updated_at,
@@ -129,11 +146,14 @@ async function main() {
   const allRepos = await reposRes.json();
   const repos = allRepos.filter((r) => !r.fork);
 
-  const images = await mapWithLimit(repos, README_CONCURRENCY, fetchReadmeImage);
+  const [images, languages] = await Promise.all([
+    mapWithLimit(repos, README_CONCURRENCY, fetchReadmeImage),
+    mapWithLimit(repos, README_CONCURRENCY, fetchLanguages),
+  ]);
 
   const payload = {
     fetchedAt: new Date().toISOString(),
-    repos: repos.map(slimRepo),
+    repos: repos.map((r, i) => slimRepo(r, languages[i])),
     images,
   };
 
