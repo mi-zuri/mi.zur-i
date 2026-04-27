@@ -100,7 +100,7 @@
         background-color: var(--bg-primary);
         z-index: 50;
         pointer-events: none;
-        transition: width 0.18s ease;
+        transition: width 0.1s ease;
       }
       /* Expands in lockstep with the navbar's own width transition on hover. */
       body:has(.navbar:hover)::before {
@@ -191,7 +191,7 @@
         z-index: 9999;
         width: var(--nav-width);
         overflow: hidden;
-        transition: width 0.18s ease;
+        transition: width 0.1s ease;
       }
       .navbar:hover {
         width: 12rem;
@@ -283,7 +283,7 @@
         overflow: hidden;
         position: relative;
         cursor: pointer;
-        transition: flex 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: flex 0.1s cubic-bezier(0.4, 0, 0.2, 1);
         text-decoration: none;
         --portal-text: var(--text-primary);
         color: var(--portal-text);
@@ -584,7 +584,6 @@
         border-bottom: 2px solid;
         padding-bottom: 0.15rem;
         letter-spacing: -0.01em;
-        transition: opacity 0.18s ease;
       }
       .contact-email:hover {
         color: var(--text-secondary);
@@ -606,8 +605,8 @@
         min-width: 4rem;
         opacity: 0.88;
         transition:
-          opacity 0.2s ease,
-          transform 0.2s ease;
+          opacity 0.1s ease,
+          transform 0.1s ease;
       }
       .contact-social:hover {
         opacity: 1;
