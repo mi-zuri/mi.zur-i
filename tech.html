@@ -551,87 +551,9 @@
       }
 
       /* ── GITHUB PROJECTS ──────────────────────────────────── */
-      const GH_USER = "mi-zuri";
-
-      // Common badge hosts to skip when picking the "first README image"
-      // (otherwise the hero is usually a green "build passing" badge).
-      const BADGE_HOST_PATTERNS = [
-        /(^|\.)shields\.io$/i,
-        /(^|\.)badge\.fury\.io$/i,
-        /(^|\.)travis-ci\.(org|com)$/i,
-        /(^|\.)circleci\.com$/i,
-        /(^|\.)codecov\.io$/i,
-        /(^|\.)coveralls\.io$/i,
-        /(^|\.)appveyor\.com$/i,
-        /(^|\.)snyk\.io$/i,
-        /(^|\.)gitter\.im$/i,
-        /(^|\.)badgen\.net$/i,
-      ];
-
-      function isBadgeUrl(url) {
-        try {
-          const u = new URL(url);
-          if (BADGE_HOST_PATTERNS.some((re) => re.test(u.hostname)))
-            return true;
-          // GitHub-hosted badge endpoints
-          if (/\/badge(s)?\b/i.test(u.pathname)) return true;
-          if (/\/workflows\/.+\/badge\.svg/i.test(u.pathname)) return true;
-          return false;
-        } catch {
-          return false;
-        }
-      }
-
-      // Resolve a markdown image src against the repo's raw URL when relative.
-      function resolveImageUrl(src, owner, repo, branch) {
-        if (!src) return null;
-        if (/^https?:\/\//i.test(src)) return src;
-        if (src.startsWith("data:")) return null;
-        const cleaned = src.replace(/^\.?\//, "");
-        return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${cleaned}`;
-      }
-
-      // Walk through every image in README order; return the first non-badge one.
-      function pickFirstImage(md, owner, repo, branch) {
-        const images = [];
-        const mdRe = /!\[[^\]]*\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
-        const htmlRe = /<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/gi;
-        let m;
-        while ((m = mdRe.exec(md))) images.push({ src: m[1], at: m.index });
-        while ((m = htmlRe.exec(md))) images.push({ src: m[1], at: m.index });
-        images.sort((a, b) => a.at - b.at);
-
-        for (const { src } of images) {
-          const resolved = resolveImageUrl(src, owner, repo, branch);
-          if (!resolved) continue;
-          if (isBadgeUrl(resolved)) continue;
-          return resolved;
-        }
-        return null;
-      }
-
-      async function fetchReadmeImage(repo) {
-        try {
-          const res = await fetch(
-            `https://api.github.com/repos/${repo.owner.login}/${repo.name}/readme`,
-          );
-          if (!res.ok) return null;
-          const data = await res.json();
-          if (!data.download_url) return null;
-          const md = await fetch(data.download_url).then((r) =>
-            r.ok ? r.text() : null,
-          );
-          if (!md) return null;
-          return pickFirstImage(
-            md,
-            repo.owner.login,
-            repo.name,
-            repo.default_branch,
-          );
-        } catch {
-          return null;
-        }
-      }
+      // Server-side cron writes the snapshot to this path once per hour.
+      // See scripts/fetch-projects.mjs.
+      const PROJECTS_URL = "/data/projects.json";
 
       function timeAgo(iso) {
         const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
@@ -738,60 +660,36 @@
         });
       }
 
+      function renderProjects(repos, images) {
+        const list = document.getElementById("projects-list");
+        const tags = new Set();
+        repos.forEach((r) => tags.add(r.language || "other"));
+        renderFilterTags(tags);
+        list.innerHTML = repos
+          .map((r, i) => renderCard(r, images[i] || null))
+          .join("");
+      }
+
       async function loadProjects() {
         const status = document.getElementById("projects-status");
-        const list = document.getElementById("projects-list");
 
-        let repos;
+        let payload;
         try {
-          const res = await fetch(
-            `https://api.github.com/users/${GH_USER}/repos?sort=updated&per_page=100`,
-          );
-          if (!res.ok) {
-            throw new Error(
-              res.status === 403
-                ? "github rate limit hit — try again in a bit"
-                : `github responded with ${res.status}`,
-            );
-          }
-          repos = await res.json();
+          const res = await fetch(PROJECTS_URL, { cache: "no-cache" });
+          if (!res.ok) throw new Error(`server responded with ${res.status}`);
+          payload = await res.json();
         } catch (err) {
           status.innerHTML = `couldn't load projects.<div class="small">${escapeHtml(err.message)}</div>`;
           return;
         }
 
-        // Drop forks; keep archived (it's still our work). Already sorted by updated_at desc.
-        repos = repos.filter((r) => !r.fork);
-
-        if (repos.length === 0) {
+        if (!payload.repos || payload.repos.length === 0) {
           status.textContent = "no projects yet ^.^";
           return;
         }
 
-        // Kick off README image fetches in parallel; render placeholders immediately
-        // so users see content even if some READMEs hang or fail.
         status.remove();
-
-        const tags = new Set();
-        repos.forEach((r) => tags.add(r.language || "other"));
-        renderFilterTags(tags);
-
-        // Render skeleton cards (no image yet)
-        list.innerHTML = repos.map((r) => renderCard(r, null)).join("");
-
-        // Now resolve images and patch them in
-        const results = await Promise.allSettled(repos.map(fetchReadmeImage));
-        results.forEach((res, i) => {
-          if (res.status !== "fulfilled" || !res.value) return;
-          const card = list.children[i];
-          if (!card) return;
-          const wrap = card.querySelector(".project-image-wrap");
-          if (!wrap) return;
-          wrap.classList.remove("empty");
-          wrap.innerHTML = `<img class="project-image" src="${escapeHtml(res.value)}"
-              alt="${escapeHtml(repos[i].name)} preview" loading="lazy"
-              onerror="this.parentElement.classList.add('empty');this.parentElement.textContent='no preview';"/>`;
-        });
+        renderProjects(payload.repos, payload.images || []);
       }
 
       loadProjects();

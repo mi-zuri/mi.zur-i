@@ -24,5 +24,7 @@ jobs:
             sudo rsync -a --delete \
               --exclude='.git*' \
               --exclude='*.md' \
+              --exclude='data/' \
               ./ /var/www/mi.zur-i/
             sudo chown -R www-data:www-data /var/www/mi.zur-i
+            sudo chown -R "$USER":"$USER" /var/www/mi.zur-i/data 2>/dev/null || true
