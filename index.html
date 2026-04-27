@@ -448,6 +448,9 @@
         padding-bottom: 0.05rem;
         white-space: nowrap;
       }
+      .about-accent:hover {
+        color: var(--text-secondary);
+      }
 
       .about-sign {
         font-family: var(--font-primary);
@@ -632,14 +635,24 @@
         margin-left: calc(var(--contact-pad-x) * -1);
         margin-right: calc(var(--contact-pad-r) * -1);
       }
-      .contact-credit a {
-        color: inherit;
-        border-bottom: 1px solid currentColor;
-        padding-bottom: 1px;
-        transition: opacity 0.18s ease;
+
+      /* ── FIX OVERLAY HOVER SYNC ── */
+      /* Watches the interactive base layer for hovers and forcefully applies the active styling to the inert overlay */
+
+      /* 1. Sync Email Hover */
+      .contact-content-base:has(.contact-email:hover) + .contact-content-overlay .contact-email {
+        color: var(--text-secondary);
       }
-      .contact-credit a:hover {
-        opacity: 0.65;
+
+      /* 2. Sync Social Links Hover (maps items 1 through 5) */
+      .contact-content-base:has(.contact-social:nth-child(1):hover) + .contact-content-overlay .contact-social:nth-child(1),
+      .contact-content-base:has(.contact-social:nth-child(2):hover) + .contact-content-overlay .contact-social:nth-child(2),
+      .contact-content-base:has(.contact-social:nth-child(3):hover) + .contact-content-overlay .contact-social:nth-child(3),
+      .contact-content-base:has(.contact-social:nth-child(4):hover) + .contact-content-overlay .contact-social:nth-child(4),
+      .contact-content-base:has(.contact-social:nth-child(5):hover) + .contact-content-overlay .contact-social:nth-child(5) {
+        opacity: 1;
+        transform: translateY(-3px);
+        color: var(--text-secondary);
       }
 
       /* ── DIRECTION SIGN ──────────────────────────────────── */
@@ -887,25 +900,24 @@
           <h2 class="about-name">michal zurawski</h2>
 
           <p class="about-line">
-            studying <span class="about-accent">AI</span> at
-            <span class="about-accent">Poznań University of Technology</span>
+            studying AI at Poznań University of Technology
             <span class="about-soft">+ singing in the academic choir</span>
           </p>
 
           <p class="about-line">
             co-organizing
-            <span class="about-accent">GHOST Day: AMLC</span>
+            <a href="https://ghostday.pl/" target="_blank" class="about-accent">GHOST Day: AMLC</a>
             <span class="about-soft"
               >where researchers &amp; enthusiasts collide</span
             >
           </p>
 
           <p class="about-line">
-            making music as <span class="about-accent">mi.zur-i</span>
+            making music as <a href="https://www.youtube.com/@mi.zur-i" target="_blank" class="about-accent">mi.zur-i</a>
             <span class="about-soft">producing since 2011 (prev. Michu)</span>
           </p>
 
-          <p class="about-sign">stay a while ✿</p>
+          <p class="about-sign" id="about-sign"></p>
           <p class="about-xoxo">x o x o</p>
 
           <div class="about-tags">
@@ -934,7 +946,7 @@
             <h2 class="contact-headline">say hi&nbsp;✦</h2>
             <p class="contact-tagline">
               let's talk — about music, collabs, tech<br />
-              or anything...
+              anything...
             </p>
           </div>
 
@@ -999,7 +1011,7 @@
         </div>
 
         <p class="contact-credit">
-          © 2026 · <a href="#top">michał żurawski</a>
+          © 2026 · michał żurawski
         </p>
       </div>
 
@@ -1011,7 +1023,7 @@
             <h2 class="contact-headline">say hi&nbsp;✦</h2>
             <p class="contact-tagline">
               let's talk — about music, collabs, tech<br />
-              or anything...
+              anything...
             </p>
           </div>
 
@@ -1019,14 +1031,6 @@
             <span class="contact-email">michal.zurawski10@gmail.com</span>
 
             <div class="contact-socials">
-              <span class="contact-social">
-                <i class="fa fa-brands fa-linkedin"></i>
-                <span class="label">linkedin</span>
-              </span>
-              <span class="contact-social">
-                <i class="fa fa-brands fa-github"></i>
-                <span class="label">github</span>
-              </span>
               <span class="contact-social">
                 <i class="fa fa-brands fa-youtube"></i>
                 <span class="label">youtube</span>
@@ -1038,6 +1042,14 @@
               <span class="contact-social">
                 <i class="fa fa-brands fa-twitter"></i>
                 <span class="label">twitter</span>
+              </span>
+                 <span class="contact-social">
+                <i class="fa fa-brands fa-linkedin"></i>
+                <span class="label">linkedin</span>
+              </span>
+              <span class="contact-social">
+                <i class="fa fa-brands fa-github"></i>
+                <span class="label">github</span>
               </span>
             </div>
           </div>
@@ -1161,6 +1173,27 @@
           }
         });
       });
+
+      (function () {
+        const lines = [
+          "stay a while ✿",
+          "enjoy the noise ✿",
+          "glad you're here ✿",
+        ];
+
+        const el = document.getElementById("about-sign");
+        if (!el) return;
+
+        const last = localStorage.getItem("about-line");
+        let next;
+
+        do {
+          next = lines[Math.floor(Math.random() * lines.length)];
+        } while (lines.length > 1 && next === last);
+
+        localStorage.setItem("about-line", next);
+        el.textContent = next;
+      })();
     </script>
   </body>
 </html>
