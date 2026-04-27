@@ -8,6 +8,11 @@
     <meta name="description" content="music portfolio — coming soon" />
     <meta name="author" content="Michał Żurawski" />
     <link rel="stylesheet" href="https://use.typekit.net/lgc5ifx.css" />
+    <script>
+      if (localStorage.getItem("dark-mode") === "1") {
+        document.documentElement.style.setProperty("--bg-primary", "#1c1c1c");
+      }
+    </script>
     <style>
       :root {
         --font-primary: "birch-std", monospace;
