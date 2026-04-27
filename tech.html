@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="tech portfolio — projects, fetched live from github"
+      content="tech portfolio — projects, fetched from github"
     />
     <meta name="author" content="Michał Żurawski" />
     <link rel="stylesheet" href="https://use.typekit.net/lgc5ifx.css" />
@@ -392,6 +392,12 @@
         height: 100%;
         object-fit: cover;
         display: block;
+
+        filter: grayscale(100%) contrast(0.8);
+      }
+
+      body.dark-mode .project-image {
+        filter: grayscale(100%) contrast(0.8) invert(1);
       }
 
       /* ── RESPONSIVE ──────────────────────────────────────── */
@@ -498,7 +504,7 @@
         <p class="page-subtitle">
           projects, research &amp; side-quests
           <span class="page-soft"
-            >fetched live from github · sorted by recent updates</span
+            >fetched from github · sorted by recent updates</span
           >
         </p>
       </section>
@@ -538,6 +544,7 @@
 
       function darkModeOn(silent) {
         document.documentElement.style.setProperty("--bg-primary", "#1c1c1c");
+        document.body.classList.add("dark-mode");
         document.getElementById("dark-mode-label").textContent = "light-mode";
         document.getElementById("navbar").style.backgroundColor = "#1c1c1c";
         localStorage.setItem("dark-mode", "1");
@@ -545,6 +552,7 @@
 
       function darkModeOff() {
         document.documentElement.style.setProperty("--bg-primary", "#c7c7c7");
+        document.body.classList.remove("dark-mode");
         document.getElementById("dark-mode-label").textContent = "night-mode";
         document.getElementById("navbar").style.backgroundColor = "#c7c7c7";
         localStorage.setItem("dark-mode", "0");
