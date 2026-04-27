@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// Fetch GitHub repos + README hero images, write a JSON snapshot to disk.
-// Designed to be run by cron once per hour. Writes atomically via tmp+rename
-// so nginx never serves a half-written file.
+// Fetch GitHub repos + docs/images/preview.* hero images, write a JSON
+// snapshot to disk. Designed to be run by cron once per hour. Writes atomically
+// via tmp+rename so nginx never serves a half-written file.
 //
 // Env:
 //   GH_USER         (default "mi-zuri")
 //   OUT_PATH        (default "/var/www/mi.zur-i/data/projects.json")
 //   GITHUB_TOKEN    optional; raises rate limit from 60/hr to 5000/hr
-//   README_CONCURRENCY  optional; max parallel README fetches (default 6)
+//   README_CONCURRENCY  optional; max parallel side-call fetches (default 6)
 
 import { writeFile, rename, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
@@ -23,55 +23,7 @@ const headers = {
   ...(TOKEN ? { authorization: `Bearer ${TOKEN}` } : {}),
 };
 
-const BADGE_HOST_PATTERNS = [
-  /(^|\.)shields\.io$/i,
-  /(^|\.)badge\.fury\.io$/i,
-  /(^|\.)travis-ci\.(org|com)$/i,
-  /(^|\.)circleci\.com$/i,
-  /(^|\.)codecov\.io$/i,
-  /(^|\.)coveralls\.io$/i,
-  /(^|\.)appveyor\.com$/i,
-  /(^|\.)snyk\.io$/i,
-  /(^|\.)gitter\.im$/i,
-  /(^|\.)badgen\.net$/i,
-];
-
-function isBadgeUrl(url) {
-  try {
-    const u = new URL(url);
-    if (BADGE_HOST_PATTERNS.some((re) => re.test(u.hostname))) return true;
-    if (/\/badge(s)?\b/i.test(u.pathname)) return true;
-    if (/\/workflows\/.+\/badge\.svg/i.test(u.pathname)) return true;
-    return false;
-  } catch {
-    return false;
-  }
-}
-
-function resolveImageUrl(src, owner, repo, branch) {
-  if (!src) return null;
-  if (/^https?:\/\//i.test(src)) return src;
-  if (src.startsWith("data:")) return null;
-  const cleaned = src.replace(/^\.?\//, "");
-  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${cleaned}`;
-}
-
-function pickFirstImage(md, owner, repo, branch) {
-  const images = [];
-  const mdRe = /!\[[^\]]*\]\(([^)\s]+)(?:\s+["'][^"']*["'])?\)/g;
-  const htmlRe = /<img\b[^>]*?\bsrc=["']([^"']+)["'][^>]*>/gi;
-  let m;
-  while ((m = mdRe.exec(md))) images.push({ src: m[1], at: m.index });
-  while ((m = htmlRe.exec(md))) images.push({ src: m[1], at: m.index });
-  images.sort((a, b) => a.at - b.at);
-  for (const { src } of images) {
-    const resolved = resolveImageUrl(src, owner, repo, branch);
-    if (!resolved) continue;
-    if (isBadgeUrl(resolved)) continue;
-    return resolved;
-  }
-  return null;
-}
+const PREVIEW_RE = /^preview\.(png|jpe?g|gif|webp|svg|avif)$/i;
 
 async function fetchLanguages(repo) {
   try {
@@ -89,19 +41,21 @@ async function fetchLanguages(repo) {
   }
 }
 
-async function fetchReadmeImage(repo) {
+// Look for docs/images/preview.{png,jpg,...} in the repo. One directory
+// listing handles every supported extension; missing dir → 404 → null.
+async function fetchPreviewImage(repo) {
   try {
     const res = await fetch(
-      `https://api.github.com/repos/${repo.owner.login}/${repo.name}/readme`,
+      `https://api.github.com/repos/${repo.owner.login}/${repo.name}/contents/docs/images`,
       { headers },
     );
     if (!res.ok) return null;
     const data = await res.json();
-    if (!data.download_url) return null;
-    const mdRes = await fetch(data.download_url);
-    if (!mdRes.ok) return null;
-    const md = await mdRes.text();
-    return pickFirstImage(md, repo.owner.login, repo.name, repo.default_branch);
+    if (!Array.isArray(data)) return null;
+    const file = data.find(
+      (f) => f.type === "file" && PREVIEW_RE.test(f.name),
+    );
+    return file?.download_url ?? null;
   } catch {
     return null;
   }
@@ -147,7 +101,7 @@ async function main() {
   const repos = allRepos.filter((r) => !r.fork);
 
   const [images, languages] = await Promise.all([
-    mapWithLimit(repos, README_CONCURRENCY, fetchReadmeImage),
+    mapWithLimit(repos, README_CONCURRENCY, fetchPreviewImage),
     mapWithLimit(repos, README_CONCURRENCY, fetchLanguages),
   ]);
 
