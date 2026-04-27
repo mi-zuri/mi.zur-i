@@ -4,7 +4,7 @@ Personal website of Michał Żurawski.
 
 ---
 
-![mi.zur-i landing page](docs/images/landing.png)
+![mi.zur-i landing page](docs/images/preview.png)
 
 ---
 
