@@ -1,4 +1,4 @@
-# mi.zur-i.com
+# [mi.zur-i.com](https://mi.zur-i.com)
 
 Personal website of Michał Żurawski.
 
