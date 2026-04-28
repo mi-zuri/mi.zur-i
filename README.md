@@ -14,6 +14,12 @@ Personal website of Michał Żurawski.
 npx serve .
 ```
 
+Update projects list:
+
+```
+OUT_PATH="./data/projects.json" node scripts/fetch-projects.mjs
+```
+
 ## Structure
 
 Plain HTML/CSS/JS — no build step.
