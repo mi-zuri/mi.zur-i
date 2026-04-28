@@ -662,11 +662,25 @@
         );
       }
 
+      function normalizeLanguageTag(lang) {
+        const value = String(lang || "");
+        const normalized = value.toLowerCase();
+        if (
+          normalized === "cmake" ||
+          normalized === "dockerfile" ||
+          normalized === "makefile" ||
+          normalized === "objective-c"
+        ) {
+          return "other";
+        }
+        return value;
+      }
+
       function repoTags(repo) {
         if (Array.isArray(repo.languages) && repo.languages.length > 0) {
-          return repo.languages;
+          return [...new Set(repo.languages.map(normalizeLanguageTag))];
         }
-        return [repo.language || "other"];
+        return [normalizeLanguageTag(repo.language || "other")];
       }
 
       const MY_USERNAME = "mi-zuri";
@@ -735,8 +749,11 @@
       // label shown on the button; the value is the set of languages that
       // satisfy it. Members are matched against the underlying per-card tags.
       const FILTER_GROUPS = {
-        "C/C++": ["C", "C++"],
-        "JavaScript/TypeScript": ["JavaScript", "TypeScript"],
+        "C / C++": ["C", "C++"],
+        "JavaScript / TypeScript": ["JavaScript", "TypeScript"],
+        "CSS / HTML": ["CSS", "HTML"],
+        "Java / Kotlin": ["Java", "Kotlin"],
+        Python: ["Python", "Jupyter Notebook"],
       };
 
       function groupForLanguage(lang) {
@@ -749,7 +766,11 @@
       function renderFilterTags(tags) {
         const container = document.getElementById("filter-tags");
         const grouped = new Set([...tags].map(groupForLanguage));
-        const sorted = [...grouped].sort((a, b) => a.localeCompare(b));
+        const sorted = [...grouped].sort((a, b) => {
+          if (a === "other" && b !== "other") return 1;
+          if (b === "other" && a !== "other") return -1;
+          return a.localeCompare(b);
+        });
         const allBtn = `<button class="filter-tag active" data-tag="__all__">all</button>`;
         const tagBtns = sorted
           .map(
