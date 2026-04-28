@@ -458,6 +458,19 @@
 
       /* ── RESPONSIVE ──────────────────────────────────────── */
       @media (max-width: 699px) {
+        /* Halo's geometry is tied to the desktop navbar (right side, tall);
+           mobile navbar is bottom-anchored and full-width, so the halo isn't
+           meaningful there and would otherwise sit stuck on the right edge. */
+        body::before {
+          display: none;
+        }
+        /* Reserve clearance below the page so the fixed bottom navbar
+           can't occlude the last section.
+           margin (not padding) so the gap doesn't paint with body's bg —
+           html's --text-primary background shows through instead. */
+        body {
+          padding-bottom: 3rem;
+        }
         header .right {
           margin-right: 0;
         }
@@ -469,20 +482,22 @@
           bottom: 0;
           top: auto;
           width: 100vw !important;
-          height: 4rem;
+          height: 3rem;
           margin: 0;
           border-width: 2px 0 0;
           border-color: var(--bg-secondary);
         }
         .navbar-nav {
           flex-direction: row;
-          height: 4rem;
+          height: 3rem;
         }
         .nav-item:last-child {
-          display: none;
+          margin-top: 0;
         }
         .nav-link {
           justify-content: center;
+          height: 3rem;
+          font-size: 1.5rem;
         }
         .link-text {
           display: none !important;
@@ -491,7 +506,6 @@
         main {
           margin-left: 0;
           margin-right: 0;
-          padding-bottom: 6rem;
         }
         .page-title {
           font-size: clamp(3rem, 14vw, 5rem);
