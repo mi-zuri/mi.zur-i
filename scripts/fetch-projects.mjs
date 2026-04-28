@@ -1,18 +1,32 @@
 #!/usr/bin/env node
-// Fetch GitHub repos + docs/images/preview.* hero images, write a JSON
-// snapshot to disk. Designed to be run by cron once per hour. Writes atomically
-// via tmp+rename so nginx never serves a half-written file.
+// Fetch GitHub repos (owned + contributed-to) + docs/images/preview.* hero
+// images, write a JSON snapshot to disk. Designed to be run by cron once per
+// hour. Writes atomically via tmp+rename so nginx never serves a half-written
+// file.
+//
+// "Contributed" is defined as: any repo GitHub recognizes the user as having
+// contributed to (commit, PR, review, or issue). Sourced via the GraphQL
+// `user.repositoriesContributedTo` field — REST has no equivalent and the
+// Search API only sees merged PRs.
+//
+// GITHUB_TOKEN is REQUIRED for contributions to populate (GraphQL refuses
+// unauthenticated requests). Without it, owned repos still work; contributions
+// silently return [].
 //
 // Env:
-//   GH_USER         (default "mi-zuri")
+//   GH_USER         (default "mi-zuri") — owner of the repo listing
+//   GH_CONTRIB_USER (default GH_USER) — personal login used for the
+//                   contributions query; set when GH_USER is an org
 //   OUT_PATH        (default "/var/www/mi.zur-i/data/projects.json")
-//   GITHUB_TOKEN    optional; raises rate limit from 60/hr to 5000/hr
+//   GITHUB_TOKEN    required for contributions; raises rate limit from
+//                   60/hr to 5000/hr regardless
 //   README_CONCURRENCY  optional; max parallel side-call fetches (default 6)
 
 import { writeFile, rename, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 
 const GH_USER = process.env.GH_USER || "mi-zuri";
+const GH_CONTRIB_USER = process.env.GH_CONTRIB_USER || GH_USER;
 const OUT_PATH = process.env.OUT_PATH || "/var/www/mi.zur-i/data/projects.json";
 const TOKEN = process.env.GITHUB_TOKEN;
 const README_CONCURRENCY = Number(process.env.README_CONCURRENCY) || 6;
@@ -80,6 +94,7 @@ async function mapWithLimit(items, limit, fn) {
 function slimRepo(r, languages) {
   return {
     name: r.name,
+    full_name: r.full_name,
     description: r.description,
     language: r.language,
     languages: languages || [],
@@ -87,6 +102,76 @@ function slimRepo(r, languages) {
     html_url: r.html_url,
     updated_at: r.updated_at,
   };
+}
+
+// GraphQL → every repo the user has contributed to (commit, PR, review,
+// issue). Paginates through all pages. Returns "owner/name" pairs that the
+// REST hydrate step then turns into full repo objects.
+//
+// `includeUserRepositories: false` excludes repos the user owns — those come
+// from the REST listing already. Without a token GraphQL 401s, so we bail
+// quietly and let the script continue with owned repos only.
+async function fetchContributedFullNames() {
+  if (!TOKEN) {
+    console.warn(
+      "no GITHUB_TOKEN set; skipping contributions (GraphQL requires auth)",
+    );
+    return [];
+  }
+  const query = `
+    query($login: String!, $cursor: String) {
+      user(login: $login) {
+        repositoriesContributedTo(
+          first: 100,
+          after: $cursor,
+          privacy: PUBLIC,
+          includeUserRepositories: false,
+          contributionTypes: [COMMIT, PULL_REQUEST, PULL_REQUEST_REVIEW, ISSUE]
+        ) {
+          pageInfo { hasNextPage endCursor }
+          nodes { nameWithOwner isFork }
+        }
+      }
+    }`;
+  const names = [];
+  let cursor = null;
+  for (let page = 0; page < 10; page++) {
+    const res = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: { ...headers, "content-type": "application/json" },
+      body: JSON.stringify({
+        query,
+        variables: { login: GH_CONTRIB_USER, cursor },
+      }),
+    });
+    if (!res.ok) {
+      console.warn(`graphql contributions responded ${res.status}; skipping`);
+      return names;
+    }
+    const json = await res.json();
+    if (json.errors) {
+      console.warn(`graphql errors: ${JSON.stringify(json.errors)}`);
+      return names;
+    }
+    const conn = json.data?.user?.repositoriesContributedTo;
+    if (!conn) return names;
+    for (const n of conn.nodes) {
+      if (!n.isFork) names.push(n.nameWithOwner);
+    }
+    if (!conn.pageInfo.hasNextPage) break;
+    cursor = conn.pageInfo.endCursor;
+  }
+  return names;
+}
+
+async function fetchRepoByUrl(url) {
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
 }
 
 async function main() {
@@ -98,7 +183,30 @@ async function main() {
     throw new Error(`github repos endpoint responded ${reposRes.status}`);
   }
   const allRepos = await reposRes.json();
-  const repos = allRepos.filter((r) => !r.fork);
+  const ownRepos = allRepos.filter((r) => !r.fork);
+  const ownFullNames = new Set(ownRepos.map((r) => r.full_name));
+
+  // Contributed repos: dedupe against owned (so a contribution to your own
+  // repo doesn't double-count) and drop forks for the same reason owned forks
+  // are dropped.
+  const contribFullNames = (await fetchContributedFullNames()).filter(
+    (fn) => !ownFullNames.has(fn),
+  );
+  const contribUrls = contribFullNames.map(
+    (fn) => `https://api.github.com/repos/${fn}`,
+  );
+  const contribReposRaw = await mapWithLimit(
+    contribUrls,
+    README_CONCURRENCY,
+    fetchRepoByUrl,
+  );
+  const contribRepos = contribReposRaw.filter((r) => r && !r.fork);
+
+  // Merge, then re-sort by updated_at since the two sources are independently
+  // ordered. Newest first.
+  const repos = [...ownRepos, ...contribRepos].sort(
+    (a, b) => new Date(b.updated_at) - new Date(a.updated_at),
+  );
 
   const [images, languages] = await Promise.all([
     mapWithLimit(repos, README_CONCURRENCY, fetchPreviewImage),
@@ -117,7 +225,7 @@ async function main() {
   await rename(tmp, OUT_PATH);
 
   console.log(
-    `[${new Date().toISOString()}] wrote ${repos.length} repos (${images.filter(Boolean).length} with images) to ${OUT_PATH}`,
+    `[${new Date().toISOString()}] wrote ${repos.length} repos (${ownRepos.length} owned + ${contribRepos.length} contributed, ${images.filter(Boolean).length} with images) to ${OUT_PATH}`,
   );
 }
 

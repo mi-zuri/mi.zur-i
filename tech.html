@@ -669,6 +669,8 @@
         return [repo.language || "other"];
       }
 
+      const MY_USERNAME = "mi-zuri";
+
       function renderCard(repo, image) {
         const tags = repoTags(repo);
         const tagBadges = tags
@@ -679,17 +681,22 @@
             ? repo.homepage
             : null;
 
+        const owner = repo.full_name?.split("/")[0];
+
+        const isMine = owner?.toLowerCase() === MY_USERNAME.toLowerCase();
+
+        const displayName = isMine ? repo.name : repo.full_name || repo.name;
         const imageHref = homepage || repo.html_url;
         const imageBlock = image
-          ? `<a class="project-image-link" href="${escapeHtml(imageHref)}" target="_blank" rel="noopener" aria-label="${escapeHtml(repo.name)} ${homepage ? "demo" : "repository"}">
+          ? `<a class="project-image-link" href="${escapeHtml(imageHref)}" target="_blank" rel="noopener" aria-label="${escapeHtml(displayName)} ${homepage ? "demo" : "repository"}">
                <div class="project-image-wrap">
                  <img class="project-image" src="${escapeHtml(image)}"
-                      alt="${escapeHtml(repo.name)} preview"
+                      alt="${escapeHtml(displayName)} preview"
                       loading="lazy"
                       onerror="this.parentElement.classList.add('empty');this.parentElement.textContent='no preview';"/>
                </div>
              </a>`
-          : `<a class="project-image-link" href="${escapeHtml(imageHref)}" target="_blank" rel="noopener" aria-label="${escapeHtml(repo.name)} ${homepage ? "demo" : "repository"}">
+          : `<a class="project-image-link" href="${escapeHtml(imageHref)}" target="_blank" rel="noopener" aria-label="${escapeHtml(displayName)} ${homepage ? "demo" : "repository"}">
                <div class="project-image-wrap empty">no preview</div>
              </a>`;
 
@@ -710,7 +717,7 @@
                 ${tagBadges}
                 <span class="project-updated">updated ${escapeHtml(timeAgo(repo.updated_at))}</span>
               </div>
-              <h2 class="project-name">${escapeHtml(repo.name)}</h2>
+              <h2 class="project-name">${escapeHtml(displayName)}</h2>
               ${description}
               <div class="project-links">
                 <a class="project-link" href="${escapeHtml(repo.html_url)}" target="_blank" rel="noopener">

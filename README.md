@@ -17,7 +17,7 @@ npx serve .
 Update projects list:
 
 ```
-OUT_PATH="./data/projects.json" node scripts/fetch-projects.mjs
+GITHUB_TOKEN=xxx OUT_PATH="./data/projects.json" node scripts/fetch-projects.mjs
 ```
 
 ## Structure
